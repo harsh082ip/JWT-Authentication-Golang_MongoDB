@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
+	helpers "github.com/harsh082ip/JWT-Authentication-Golang_MongoDB/Helpers"
 	"github.com/harsh082ip/JWT-Authentication-Golang_MongoDB/Models"
 	"github.com/joho/godotenv"
 
@@ -67,6 +68,13 @@ func SignUp(c *gin.Context) {
 			if jsonData.Password == "" {
 				c.JSON(http.StatusInternalServerError, gin.H{
 					"Error": "Password Empty",
+				})
+				return
+			}
+			if !helpers.CheckPasswordValidity(jsonData.Password) {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"Error":  "password constraints not fulfilled",
+					"detail": "Password does not meet the required criteria: it must be at least 8 characters long, contain at least one lowercase letter, one uppercase letter, one special character, and one numeric digit.",
 				})
 				return
 			}
