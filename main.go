@@ -13,6 +13,6 @@ func main() {
 
 	router := gin.Default()
 
-	router.GET("/signup", Controllers.SignUp)
+	router.POST("/signup", Controllers.SignUp)
 	router.Run(WEBPORT)
 }
