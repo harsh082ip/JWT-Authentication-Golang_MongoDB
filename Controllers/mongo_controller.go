@@ -8,8 +8,8 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	Helpers "github.com/harsh082ip/JWT-Authentication-Golang_MongoDB/Helpers"
 	"github.com/harsh082ip/JWT-Authentication-Golang_MongoDB/Models"
+	"github.com/harsh082ip/JWT-Authentication-Golang_MongoDB/helpers"
 	"github.com/joho/godotenv"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -37,7 +37,11 @@ func SignUp(c *gin.Context) {
 	// If uri is empty
 	if len(uri) == 0 {
 		println("No .env file found")
-		log.Fatal("You must set your 'MONGODB_URI' environment variable. See\n\t https://www.mongodb.com/docs/drivers/go/current/usage-examples/#environment-variable")
+		c.JSON(http.StatusBadRequest, gin.H{
+			"Status":      "MONGODB_URI not found",
+			"Description": "You must set your 'MONGODB_URI' environment variable. See\n\t https://www.mongodb.com/docs/drivers/go/current/usage-examples/#environment-variable",
+		})
+		fmt.Println("You must set your 'MONGODB_URI' environment variable. See\n\t https://www.mongodb.com/docs/drivers/go/current/usage-examples/#environment-variable")
 		return
 	}
 	println(uri)
@@ -84,6 +88,14 @@ func SignUp(c *gin.Context) {
 
 			// now we'll try to sign up the user
 
+			res, err := helpers.VerifyEmail(jsonData.Email)
+			if !res {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"Error": "Email Verification failed",
+				})
+				return
+			}
+
 			jsonData.Id = primitive.NewObjectID()
 
 			// checking if the password is empty
@@ -95,7 +107,7 @@ func SignUp(c *gin.Context) {
 			}
 
 			// Checking if the password meets the criteria
-			if !Helpers.CheckPasswordValidity(jsonData.Password) {
+			if !helpers.CheckPasswordValidity(jsonData.Password) {
 				c.JSON(http.StatusBadRequest, gin.H{
 					"Error":  "password constraints not fulfilled",
 					"detail": "Password does not meet the required criteria: it must be at least 8 characters long, contain at least one lowercase letter, one uppercase letter, one special character, and one numeric digit.",
@@ -104,7 +116,7 @@ func SignUp(c *gin.Context) {
 			}
 
 			// Creating Hash of the Password
-			hashpass, er := Helpers.HashPassword(jsonData.Password)
+			hashpass, er := helpers.HashPassword(jsonData.Password)
 			if er != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{
 					"Error":  "Error creating password hash",

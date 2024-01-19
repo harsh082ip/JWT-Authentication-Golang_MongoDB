@@ -15,4 +15,11 @@ func main() {
 
 	router.POST("/signup", Controllers.SignUp)
 	router.Run(WEBPORT)
+
+	// res, err := helpers.VerifyEmail("lionrbl6@gmgail.com")
+	// if !res {
+	// 	fmt.Println(err)
+	// } else {
+	// 	fmt.Println(res)
+	// }
 }
